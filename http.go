@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"path"
@@ -14,6 +15,7 @@ import (
 
 	"github.com/avvvet/oxygen-wallet/wallet"
 	"github.com/avvvet/oxygen/pkg/kv"
+	"github.com/savioxavier/termlink"
 )
 
 const tempDir = "templates"
@@ -115,6 +117,15 @@ func (h *HttpServer) Wallet(w http.ResponseWriter, req *http.Request) {
 
 func (h *HttpServer) Run() {
 	http.HandleFunc("/", h.Wallet)
-	fmt.Printf("starting sever at port %v", strconv.Itoa(int(h.port)))
-	http.ListenAndServe("0.0.0.0:"+strconv.Itoa(int(h.port)), nil)
+
+	listener, err := net.Listen("tcp", ":"+strconv.Itoa(int(h.port)))
+	if err != nil {
+		panic(err)
+	}
+	logger.Sugar().Infof("listening web requests at port 😎️ %v ... ", listener.Addr().(*net.TCPAddr).Port)
+	fmt.Println("")
+	fmt.Println(termlink.ColorLink("access your otwo wallet app at this link 👉️ ", "http://127.0.0.1:"+strconv.Itoa(listener.Addr().(*net.TCPAddr).Port), "italic yellow"))
+	if err := http.Serve(listener, nil); err != nil {
+		logger.Sugar().Fatal(err)
+	}
 }
