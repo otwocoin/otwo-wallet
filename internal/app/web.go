@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"encoding/json"
@@ -13,22 +13,28 @@ import (
 	"strconv"
 	"text/template"
 
-	"github.com/avvvet/oxygen-wallet/wallet"
+	//"github.com/avvvet/oxygen-wallet/wallet"
 	"github.com/avvvet/oxygen/pkg/kv"
+	"github.com/avvvet/oxygen/pkg/wallet"
 	"github.com/savioxavier/termlink"
+	"go.uber.org/zap"
 )
 
 const tempDir = "templates"
 
+var (
+	logger, _ = zap.NewDevelopment()
+)
+
 type HttpServer struct {
-	port uint16
+	port uint
 }
 
-func (h *HttpServer) GetPort() uint16 {
+func (h *HttpServer) GetPort() uint {
 	return h.port
 }
 
-func NewWeb(port uint16) *HttpServer {
+func NewWeb(port uint) *HttpServer {
 	return &HttpServer{port}
 }
 
@@ -38,6 +44,9 @@ func NewDir(path string) {
 		if err != nil {
 			log.Println(err)
 		}
+		logger.Sugar().Info("local store for otwo wallet created \n")
+	} else {
+		logger.Sugar().Info("local wallet store found \n")
 	}
 }
 
@@ -46,7 +55,7 @@ func InitWalletLedger(path string) ([]*wallet.Wo, error) {
 
 	ledger, err := kv.NewLedger(path)
 	if err != nil {
-		logger.Sugar().Fatal("unable to initialize ledger.")
+		logger.Sugar().Fatal("unable to initialize wallet ledger.")
 	}
 
 	iter := ledger.Db.NewIterator(nil, nil)
@@ -60,6 +69,7 @@ func InitWalletLedger(path string) ([]*wallet.Wo, error) {
 		}
 		iter.Release()
 		listWallet = append(listWallet, wallet)
+		logger.Sugar().Info("new wallet address created and stored in local ledger \n")
 		return listWallet, err
 	}
 
@@ -75,6 +85,7 @@ func InitWalletLedger(path string) ([]*wallet.Wo, error) {
 		}
 	}
 	iter.Release()
+	logger.Sugar().Info("existing wallets fetched \n")
 	return listWallet, nil
 }
 
@@ -122,7 +133,7 @@ func (h *HttpServer) Run() {
 	if err != nil {
 		panic(err)
 	}
-	logger.Sugar().Infof("listening web requests at port 😎️ %v ... ", listener.Addr().(*net.TCPAddr).Port)
+	logger.Sugar().Infof("listening web requests at port 😎️ %v", listener.Addr().(*net.TCPAddr).Port)
 	fmt.Println("")
 	fmt.Println(termlink.ColorLink("access your otwo wallet app at this link 👉️ ", "http://127.0.0.1:"+strconv.Itoa(listener.Addr().(*net.TCPAddr).Port), "italic yellow"))
 	if err := http.Serve(listener, nil); err != nil {
