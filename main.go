@@ -10,8 +10,8 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/avvvet/oxygen-wallet/internal/app"
-	"github.com/avvvet/oxygen-wallet/internal/pkg/net"
+	"github.com/avvvet/otwo-wallet/internal/app"
+	"github.com/avvvet/otwo-wallet/internal/pkg/net"
 	"github.com/common-nighthawk/go-figure"
 	"github.com/libp2p/go-libp2p/core/host"
 	"github.com/multiformats/go-multiaddr"
@@ -48,7 +48,7 @@ func main() {
 
 	app.NewDir(ledger_path)
 
-	_, err := app.InitWalletLedger(ledger_path)
+	wl, err := app.InitWalletLedger(ledger_path)
 	if err != nil {
 		logger.Sugar().Warn("critical error in wallet address")
 	}
@@ -67,7 +67,7 @@ func main() {
 	fmt.Println("")
 
 	/*create gossipSub */
-	_, err = net.InitPubSub(ctx, h, "otwo-wallet")
+	ps, err := net.InitPubSub(ctx, h, "otwo")
 	if err != err {
 		logger.Sugar().Fatal("Error: creating pubsub", err)
 	}
@@ -79,8 +79,11 @@ func main() {
 
 	go net.Discover(ctx, h, dht, config.Rendezvous)
 
-	/*http server */
-	http := app.NewWeb(config.HttpPort)
+	/*
+	  http server
+	  pass ctx, Topic and wallet list
+	*/
+	http := app.NewWeb(ctx, config.HttpPort, ps.Topic, wl)
 	go http.Run()
 
 	run(h, cancel)

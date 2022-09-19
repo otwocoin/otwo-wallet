@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -13,9 +14,11 @@ import (
 	"strconv"
 	"text/template"
 
-	//"github.com/avvvet/oxygen-wallet/wallet"
+	//"github.com/avvvet/oxygen-wallet/internal/pkg/wallet"
 	"github.com/avvvet/oxygen/pkg/kv"
+
 	"github.com/avvvet/oxygen/pkg/wallet"
+	pubsub "github.com/libp2p/go-libp2p-pubsub"
 	"github.com/savioxavier/termlink"
 	"go.uber.org/zap"
 )
@@ -27,15 +30,18 @@ var (
 )
 
 type HttpServer struct {
-	port uint
+	port        uint
+	topic       *pubsub.Topic
+	walletStore []*wallet.WalletAddressByte
+	context     context.Context
 }
 
 func (h *HttpServer) GetPort() uint {
 	return h.port
 }
 
-func NewWeb(port uint) *HttpServer {
-	return &HttpServer{port}
+func NewWeb(ctx context.Context, port uint, t *pubsub.Topic, wl []*wallet.WalletAddressByte) *HttpServer {
+	return &HttpServer{port, t, wl, ctx}
 }
 
 func NewDir(path string) {
@@ -50,8 +56,8 @@ func NewDir(path string) {
 	}
 }
 
-func InitWalletLedger(path string) ([]*wallet.Wo, error) {
-	var listWallet []*wallet.Wo
+func InitWalletLedger(path string) ([]*wallet.WalletAddressByte, error) {
+	var listWallet []*wallet.WalletAddressByte
 
 	ledger, err := kv.NewLedger(path)
 	if err != nil {
@@ -61,14 +67,16 @@ func InitWalletLedger(path string) ([]*wallet.Wo, error) {
 	iter := ledger.Db.NewIterator(nil, nil)
 	if !iter.Last() {
 		wallet := wallet.NewWallet()
-		b, _ := json.Marshal(wallet)
+		/* encode wallet before storing and decod before usage*/
+		walletByte := wallet.EncodeWallet()
+		b, _ := json.Marshal(walletByte)
 
-		err = ledger.Upsert([]byte(wallet.BlockchainAddress), b)
+		err = ledger.Upsert([]byte(wallet.WalletAddress), b)
 		if err != nil {
 			return nil, err
 		}
 		iter.Release()
-		listWallet = append(listWallet, wallet)
+		listWallet = append(listWallet, walletByte)
 		logger.Sugar().Info("new wallet address created and stored in local ledger \n")
 		return listWallet, err
 	}
@@ -77,7 +85,7 @@ func InitWalletLedger(path string) ([]*wallet.Wo, error) {
 
 		v := iter.Value()
 
-		w := &wallet.Wo{}
+		w := &wallet.WalletAddressByte{}
 		err = json.Unmarshal(v, w)
 		listWallet = append(listWallet, w)
 		if err != nil {
@@ -117,7 +125,7 @@ func (h *HttpServer) Wallet(w http.ResponseWriter, req *http.Request) {
 	switch req.Method {
 	case http.MethodGet:
 		w.Header().Add("Content-Type", "application/json")
-		myWallet := wallet.NewWallet()
+		myWallet := h.walletStore
 		m, _ := json.Marshal(myWallet)
 		io.WriteString(w, string(m[:]))
 	default:
@@ -126,9 +134,38 @@ func (h *HttpServer) Wallet(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+type TransactionReq struct {
+	Token                 int
+	WalletIndex           int
+	ReceiverWalletAddress string
+}
+
+func (h *HttpServer) Transaction(w http.ResponseWriter, req *http.Request) {
+	switch req.Method {
+	case http.MethodGet:
+		t, _ := template.ParseFiles(path.Join(tempDir, "index_cpu.html"))
+		t.Execute(w, "")
+	case http.MethodPost:
+		tReq := &TransactionReq{}
+		decoder := json.NewDecoder(req.Body)
+		err := decoder.Decode(tReq)
+		if err != nil {
+			io.WriteString(w, "error to decode")
+			return
+		}
+
+		SendTransaction(h.context, tReq.Token, tReq.WalletIndex, h.topic, h.walletStore)
+		fmt.Println("YYYYYYYYYYYYYYYY", tReq.Token)
+
+		// io.WriteString(w, string(JsonStatus("check log for result")))
+	default:
+		log.Printf("ERROR: Invalid HTTP Method")
+	}
+}
+
 func (h *HttpServer) Run() {
 	http.HandleFunc("/", h.Wallet)
-
+	http.HandleFunc("/transaction", h.Transaction)
 	listener, err := net.Listen("tcp", ":"+strconv.Itoa(int(h.port)))
 	if err != nil {
 		panic(err)
