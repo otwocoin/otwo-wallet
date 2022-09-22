@@ -141,6 +141,7 @@ type TransactionReq struct {
 }
 
 func (h *HttpServer) Transaction(w http.ResponseWriter, req *http.Request) {
+	resp := make(map[string]string)
 	switch req.Method {
 	case http.MethodGet:
 		t, _ := template.ParseFiles(path.Join(tempDir, "index_cpu.html"))
@@ -154,10 +155,18 @@ func (h *HttpServer) Transaction(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		SendTransaction(h.context, tReq.Token, tReq.WalletIndex, h.topic, h.walletStore)
-		fmt.Println("YYYYYYYYYYYYYYYY", tReq.Token)
+		err = BroadcastTransaction(h.context, tReq.Token, tReq.ReceiverWalletAddress, tReq.WalletIndex, h.topic, h.walletStore)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			resp["message"] = err.Error()
+			jsonResp, _ := json.Marshal(resp)
+			io.WriteString(w, string(jsonResp))
+		}
 
-		// io.WriteString(w, string(JsonStatus("check log for result")))
+		w.WriteHeader(http.StatusAccepted)
+		resp["message"] = "Transaction Broadcasted"
+		jsonResp, _ := json.Marshal(resp)
+		io.WriteString(w, string(jsonResp))
 	default:
 		log.Printf("ERROR: Invalid HTTP Method")
 	}
