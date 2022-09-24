@@ -40,7 +40,7 @@ func (h *HttpServer) GetPort() uint {
 	return h.port
 }
 
-func NewWeb(ctx context.Context, port uint, t *pubsub.Topic, wl []*wallet.WalletAddressByte) *HttpServer {
+func NewApp(ctx context.Context, port uint, t *pubsub.Topic, wl []*wallet.WalletAddressByte) *HttpServer {
 	return &HttpServer{port, t, wl, ctx}
 }
 

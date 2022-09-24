@@ -11,7 +11,7 @@ import (
 	"syscall"
 
 	"github.com/avvvet/otwo-wallet/internal/app"
-	"github.com/avvvet/otwo-wallet/internal/pkg/net"
+	net "github.com/avvvet/oxygen/pkg/net"
 	"github.com/common-nighthawk/go-figure"
 	"github.com/libp2p/go-libp2p/core/host"
 	"github.com/multiformats/go-multiaddr"
@@ -60,7 +60,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	logger.Sugar().Info("peer network address")
+	fmt.Println("peer network address")
 	for _, addr := range h.Addrs() {
 		log.Printf("  %s/p2p/%s", addr, h.ID().Pretty())
 	}
@@ -83,7 +83,7 @@ func main() {
 	  http server
 	  pass ctx, Topic and wallet list
 	*/
-	http := app.NewWeb(ctx, config.HttpPort, ps.Topic, wl)
+	http := app.NewApp(ctx, config.HttpPort, ps.Topic, wl)
 	go http.Run()
 
 	run(h, cancel)

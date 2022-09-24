@@ -52,8 +52,8 @@ github.com/anmitsu/go-shlex v0.0.0-20161002113705-648efa622239/go.mod h1:2FmKhYU
 github.com/armon/consul-api v0.0.0-20180202201655-eb2c6b5be1b6/go.mod h1:grANhF5doyWs3UAsr3K4I6qtAmlQcZDesFNEHPZAzj8=
 github.com/avvvet/merkletree v0.0.1 h1:yNdFeqgQfqF6q4jzEvrlu+Bu9QU7tRLwvQTWXKf4/o4=
 github.com/avvvet/merkletree v0.0.1/go.mod h1:55mVxAFelaBg6pBczXlS76JxMcKwMb4cvpuyS/gugRY=
-github.com/avvvet/oxygen v0.0.0-20220919133630-89fa226b2dba h1:bTdxAOuYadaf9P7vaPMHgTBvQe4NJqioYGGbriIC8NE=
-github.com/avvvet/oxygen v0.0.0-20220919133630-89fa226b2dba/go.mod h1:byeEECoGQyQTCO2elMsRbi/IsrtrjjoV0YsU0VtXXqs=
+github.com/avvvet/oxygen v0.0.0-20220922203014-9ce2a0864bb7 h1:tbype9uRvtw+TXRttZDapUmaF79n0DqlBnJoGyGndiA=
+github.com/avvvet/oxygen v0.0.0-20220922203014-9ce2a0864bb7/go.mod h1:WNIEzEEQvTDOf26FhlF2JBWADu3VNnjWhH4t8CtPb4o=
 github.com/benbjohnson/clock v1.1.0/go.mod h1:J11/hYXuz8f4ySSvYwY0FKfm+ezbsZBKZxNJlLklBHA=
 github.com/benbjohnson/clock v1.3.0 h1:ip6w0uFQkncKQ979AypyG0ER7mqUSBdKLOgAle/AT8A=
 github.com/benbjohnson/clock v1.3.0/go.mod h1:J11/hYXuz8f4ySSvYwY0FKfm+ezbsZBKZxNJlLklBHA=

@@ -6,8 +6,8 @@ import (
 	"encoding/json"
 	"errors"
 
-	net "github.com/avvvet/otwo-wallet/internal/pkg/net"
 	"github.com/avvvet/oxygen/pkg/blockchain"
+	net "github.com/avvvet/oxygen/pkg/net"
 
 	"github.com/avvvet/oxygen/pkg/util"
 

@@ -3,10 +3,9 @@ module github.com/avvvet/otwo-wallet
 go 1.18
 
 require (
-	github.com/avvvet/oxygen v0.0.0-20220919133630-89fa226b2dba
+	github.com/avvvet/oxygen v0.0.0-20220922203014-9ce2a0864bb7
 	github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be
 	github.com/libp2p/go-libp2p v0.22.0
-	github.com/libp2p/go-libp2p-kad-dht v0.18.0
 	github.com/libp2p/go-libp2p-pubsub v0.8.1
 	github.com/multiformats/go-multiaddr v0.7.0
 	github.com/savioxavier/termlink v1.2.1
@@ -60,6 +59,7 @@ require (
 	github.com/libp2p/go-flow-metrics v0.1.0 // indirect
 	github.com/libp2p/go-libp2p-asn-util v0.2.0 // indirect
 	github.com/libp2p/go-libp2p-core v0.20.0 // indirect
+	github.com/libp2p/go-libp2p-kad-dht v0.18.0 // indirect
 	github.com/libp2p/go-libp2p-kbucket v0.4.7 // indirect
 	github.com/libp2p/go-libp2p-record v0.2.0 // indirect
 	github.com/libp2p/go-msgio v0.2.0 // indirect
